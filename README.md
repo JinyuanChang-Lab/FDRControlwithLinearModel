@@ -1,3 +1,8 @@
+---
+output:
+  html_document: default
+  pdf_document: default
+---
 ## Official Implementations of `Controlling the False Discovery Rate in High-Dimensional Linear Models Using Model-X Knockoffs and p-values`
 
 ## Introduction
@@ -9,6 +14,34 @@
 -   simulation: includes codes and figures for the simulation study in the paper. It includes 5 sections, which are "Zero amplitude" (section 1, S1), "Amplitude" (section 2, S2), "Highly correlated covariates" (section 3, S3), "Two-stage refined methods" (section 4, S4), and "Low dimension" (section 5, S5).
 
 -   realdata: includes codes, data and figures for the real data analysis in the paper.
+
+## Simulation scripts and outputs
+
+| Folder | Script | Output file(s) | Reproduces |
+|---|---|---|---|
+|Zero amplitude | `S1_simulation.R` and `S1_plot.R` | `S1_simulation.RData` and 18 subfigures in folder `S1_plot` | Figures 1, F1 and F2. |
+|Zero amplitude | `S1_simulation_origin.R` and `S1_plot_origin.R` | `S1_simulation_origin.RData` and 18 subfigures in folder `S1_plot_origin` | Figures F15-F17. |
+|Zero amplitude | `S1_simulation_nongaussian.R` and `S1_plot_nongaussian.R` | `S1_simulation_nongaussian.RData` and 6 subfigures in folder `S1_plot_nongaussian` | Figure F24. |
+|Zero amplitude | `S1_simulation_ds.R` and `S1_plot_ds.R` | `S1_simulation_ds.RData` and 6 subfigures in folder `S1_plot_ds` | Figure F29. |
+|Amplitude | `S2_simulation.R` and `S2_plot.R` | `S2_simulation.RData` and 36 subfigures in folder `S2_plot` | Figures 2 and F3-F7. |
+|Amplitude | `S2_simulation_origin.R` and `S2_plot_origin.R` | `S2_simulation_origin.RData` and 18 subfigures in folder `S2_plot_origin` | Figures F18-F20. |
+|Amplitude | `S2_simulation_nongaussian.R` and `S2_plot_nongaussian.R` | `S2_simulation_nongaussian.RData` and 6 subfigures in folder `S2_plot_nongaussian` | Figure F25. |
+|Amplitude | `S2_simulation_ds.R` and `S2_plot_ds.R` | `S2_simulation_ds.RData` and 12 subfigures in folder `S2_plot_ds` | Figure F30. |
+|Highly correlated covariates | `S3_simulation.R` and `S3_plot.R` | `S3_simulation.RData` and 18 subfigures in folder `S3_plot` | Figures F8-F10. |
+|Highly correlated covariates | `S3_simulation_origin.R` and `S3_plot_origin.R` | `S3_simulation_origin.RData` and 18 subfigures in folder `S3_plot_origin` | Figures F21-F23. |
+|Two-stage refined methods | `S4_simulation.R` and `S4_plot.R` | `S4_simulation.RData` and 18 subfigures in folder `S4_plot` | Figures 3, F11 and F12. |
+|Two-stage refined methods | `S4_simulation_nongaussian.R` and `S4_plot_nongaussian.R` | `S4_simulation_nongaussian.RData` and 6 subfigures in folder `S4_plot_nongaussian` | Figure F26. |
+|Low dimension | `S5_simulation.R` and `S5_plot.R` | `S5_simulation.RData` and 18 subfigures in folder `S5_plot` | Figures 4, F13 and F14. |
+
+- All figures with names starting with "F" are in the Supplementary Material of the paper.
+
+## Real data scripts and outputs
+
+| Folder | Script | Output file(s) | Reproduces |
+|---|---|---|---|
+|realdata | `realdata.R` | 18 subfigures in folder `realdata_plot` | Figures 5, F27 and F28. |
+
+- All figures with names starting with "F" are in the Supplementary Material of the paper.
 
 ## Instructions
 
@@ -28,9 +61,11 @@
 
 * All source files for simulation study are in the folder "simulation/source".
 
+* HD_LM_BBH.R is a general solver of Algorithm 1 and 2. The corresponding demo file is Demo.R. 
+
 * Inverse.R is the code of estimating the precision matrix.
 
-* MXK_KBH_KBBH.R, MXK_KBH_KBBH_E.R are codes of Algorithm 1 and Algorithm 2.
+* MXK_KBH_KBBH.R, MXK_KBH_KBBH_E.R are codes of Algorithm 1 and Algorithm 2 with default settings.
 
 * gm.R, GMtest.R, GMtest067.R and GMtestT.R are codes of the Gaussian Mirror method.
 
@@ -49,3 +84,4 @@
 * TBBHw_pre.R is the two-stage refined version of TBBH.R.
 
 * BBH.R is the code of the BBH method.
+
