@@ -1,8 +1,3 @@
----
-output:
-  html_document: default
-  pdf_document: default
----
 ## Official Implementations of `Controlling the False Discovery Rate in High-Dimensional Linear Models Using Model-X Knockoffs and p-values`
 
 ## Introduction
