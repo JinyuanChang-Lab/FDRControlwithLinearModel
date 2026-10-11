@@ -42,8 +42,7 @@ points <- c('A' = 15, 'B' = 16, 'C' = 17, 'D' = 18)
 line_types <- c("solid", "solid", "dotted", "dashed")
 x_vals <- rep(amp_seq, times = 4)
 
-plot_result <- function(fdr_mat, power_mat, n, p, save_path) {
-  # FDR Plot
+plot_result <- function(fdr_mat, power_mat, n, p, fdr_str, save_path) {
   fdr_vals <- c(fdr_mat[, 1], fdr_mat[, 2], fdr_mat[, 3], fdr_mat[, 4])
   df_fdr <- data.frame(x = x_vals, type = type, y = fdr_vals)
   
@@ -61,9 +60,8 @@ plot_result <- function(fdr_mat, power_mat, n, p, save_path) {
     ggtitle(sprintf("n = %d, d = %d", n, p)) +
     theme(legend.position = 'none', text = element_text(size = 27), plot.title = element_text(hjust = 0.5))
   
-  ggsave(sprintf("n%d_d%d_fdr.pdf", n, p), p_fdr, device = "pdf", path = save_path, width = 8, height = 6)
+  ggsave(sprintf("n%dp%dfdr_%s.pdf", n, p, fdr_str), p_fdr, device = "pdf", path = save_path, width = 8, height = 6)
   
-  # Power Plot
   power_vals <- c(power_mat[, 1], power_mat[, 2], power_mat[, 3], power_mat[, 4])
   df_power <- data.frame(x = x_vals, type = type, y = power_vals)
   
@@ -81,17 +79,18 @@ plot_result <- function(fdr_mat, power_mat, n, p, save_path) {
     ggtitle(sprintf("n = %d, d = %d", n, p)) +
     theme(legend.position = 'none', text = element_text(size = 27), plot.title = element_text(hjust = 0.5))
   
-  ggsave(sprintf("n%d_d%d_power.pdf", n, p), p_power, device = "pdf", path = save_path, width = 8, height = 6)
+  ggsave(sprintf("n%dp%dpower_%s.pdf", n, p, fdr_str), p_power, device = "pdf", path = save_path, width = 8, height = 6)
 }
 
 n_list <- list("200" = c(200, 300, 400), "500" = c(500, 750, 1000))
 save_path <- "./S2_plot_ds"
+fdr_str <- "01" 
 
 for (n_str in names(n_list)) {
   n <- as.integer(n_str)
   p_values <- n_list[[n_str]]
   for (p in p_values) {
     res <- get_matrices(n, p)
-    plot_result(res$fdr, res$power, n, p, save_path)
+    plot_result(res$fdr, res$power, n, p, fdr_str, save_path)
   }
 }

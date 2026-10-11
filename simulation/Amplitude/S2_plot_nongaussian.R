@@ -33,6 +33,7 @@ get_matrices <- function(n, p) {
     fdr_mat[i, ] <- c(colMeans(r_val)[c(1, 3, 5)], colMeans(rgm_val)[1], colMeans(rNgm_val)[1])
     power_mat[i, ] <- c(colMeans(r_val)[c(2, 4, 6)], colMeans(rgm_val)[2], colMeans(rNgm_val)[2])
   }
+  
   return(list(fdr = fdr_mat, power = power_mat))
 }
 
@@ -42,7 +43,6 @@ points <- c('A' = 15, 'B' = 16, 'C' = 17, 'D' = 18, 'E' = 15)
 x_vals <- rep(amp_seq, times = 5)
 
 plot_result <- function(fdr_mat, power_mat, n, p, fdr_str) {
-  # FDR Plot
   fdr_vals <- c(fdr_mat[, 1], fdr_mat[, 2], fdr_mat[, 3], fdr_mat[, 4], fdr_mat[, 5])
   df_fdr <- data.frame(x = x_vals, type = type, fdr = fdr_vals)
   
@@ -62,7 +62,6 @@ plot_result <- function(fdr_mat, power_mat, n, p, fdr_str) {
   
   ggsave(sprintf("n%dp%dfdr_%s.pdf", n, p, fdr_str), p_fdr, device = "pdf", path = "./S2_plot_nongaussian", width = 8, height = 6)
   
-  # Power Plot
   power_vals <- c(power_mat[, 1], power_mat[, 2], power_mat[, 3], power_mat[, 4], power_mat[, 5])
   df_power <- data.frame(x = x_vals, type = type, power = power_vals)
   

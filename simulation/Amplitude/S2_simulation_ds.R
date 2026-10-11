@@ -28,7 +28,7 @@ rho <- 0.4
 
 run_simulation <- function(n, p, amp) {
   var_name <- paste0("r_n", n, "_p", p, "_amp", amp)
-  n_ds <- 2 * n
+  n_ds <- n
   k <- 0.04 * p
   
   loc_n_ds <- n_ds
