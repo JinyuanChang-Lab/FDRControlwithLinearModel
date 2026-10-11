@@ -9,4 +9,4 @@ PI_DATA.txt
 * The folder realdata_plot contains all subfigures of Figures 5, F27 and F28.
 
 ## Note:
-* gm.R and Inverse_real.R are source files of realdata.R.
+* source.R is the source file of realdata.R.

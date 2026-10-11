@@ -3,15 +3,14 @@ library(glmnet)
 library(scalreg)
 library(doParallel)
 
-source("gm.R")
-source("Inverse_real.R")
+source("source.R")
 
 set.seed(2024)
+
 
 #Test the PI drug
 drug_class = 'PI'
 
-#Download the data and read it into data frames.
 
 base_url = 'http://hivdb.stanford.edu/pages/published_analysis/genophenoPNAS2006'
 #gene_url = paste(base_url, 'DATA', paste0(drug_class, '_DATA.txt'), sep='/')
@@ -60,8 +59,12 @@ X = X[,colSums(X) != 0]
 Y = gene_df[,4:(pos_start-1)]
 
 
+
+
+
 # Comparison 
 Comparison <- function (X, y, q) {
+
   # Log-transform the drug resistance measurements.
   y = log(y)
   
@@ -131,11 +134,14 @@ Comparison <- function (X, y, q) {
   index2 = seq(along = p2a)[p2a <= q]
   M1_selected = colnames(X[ ,index2])
   
-  # Knockoff-assisted BBH
+  # Original debiased-lasso Algorithm 2
   p21[p1 > sqrt(q)] = 1
   p21a = p.adjust(p21, method = "BH")
   index21 = seq(along = p21a)[p21a <= sqrt(q)]
   M2_selected = colnames(X[ ,index21])
+
+  # Sarkar & Tang (2022) Method 1 (B-BH)
+  BBH_selected = BBH(X, y, alpha = q, safety = 0.99)
   
   # Run GM method
   GM = gm(y0, X0, q = q)
@@ -147,7 +153,8 @@ Comparison <- function (X, y, q) {
   Fixresult = knockoff.filter(X0, y0, fdr=q, knockoffs=knock.gen, statistic=stat.glmnet_lambdasmax)
   knockoff_selected = names(Fixresult$selected)
   
-  list(Method1 = M1_selected, Method2 = M2_selected, GM = GM_selected, Knockoff = knockoff_selected)
+  list(Method1 = M1_selected, Method2 = M2_selected, GM = GM_selected,
+       Knockoff = knockoff_selected, BBH = BBH_selected)
 }
 
 
@@ -205,7 +212,10 @@ comparisons005 <- lapply(results005, function(drug) {
 cnames = c("Algorithm1", "Algorithm2", "GM", "Knockoff", "B-BH")
 rnames = c("true_discoveries", "false_discoveries")
 
-#For BBH, we directly extract the data according to Sarkar and Tang (2022).
+# B-BH is computed by the standalone BBH() function.
+
+# Create the plot directory automatically if needed.
+if (!dir.exists("realdata_plot")) dir.create("realdata_plot", recursive = TRUE)
 
 
 ######### APV 0.05
@@ -213,7 +223,7 @@ apv005 = matrix(c(comparisons005$APV$Method1$true_discoveries, comparisons005$AP
                   comparisons005$APV$Method2$true_discoveries, comparisons005$APV$Method2$false_discoveries,
                   comparisons005$APV$GM$true_discoveries, comparisons005$APV$GM$false_discoveries,
                   comparisons005$APV$Knockoff$true_discoveries, comparisons005$APV$Knockoff$false_discoveries,
-                  6, 0), nrow = 2, ncol = 5, byrow = FALSE, dimnames = list(rnames, cnames))
+                  comparisons005$APV$BBH$true_discoveries, comparisons005$APV$BBH$false_discoveries), nrow = 2, ncol = 5, byrow = FALSE, dimnames = list(rnames, cnames))
 
 pdf("./realdata_plot/apv005.pdf", width = 10, height = 8)
 barplot(apv005, main = "Resistance to APV", 
@@ -225,7 +235,7 @@ atv005 = matrix(c(comparisons005$ATV$Method1$true_discoveries, comparisons005$AT
                   comparisons005$ATV$Method2$true_discoveries, comparisons005$ATV$Method2$false_discoveries,
                   comparisons005$ATV$GM$true_discoveries, comparisons005$ATV$GM$false_discoveries,
                   comparisons005$ATV$Knockoff$true_discoveries, comparisons005$ATV$Knockoff$false_discoveries,
-                  0, 0), nrow = 2, ncol = 5, byrow = FALSE, dimnames = list(rnames, cnames))
+                  comparisons005$ATV$BBH$true_discoveries, comparisons005$ATV$BBH$false_discoveries), nrow = 2, ncol = 5, byrow = FALSE, dimnames = list(rnames, cnames))
 
 pdf("./realdata_plot/atv005.pdf", width = 10, height = 8)
 barplot(atv005, main = "Resistance to ATV", 
@@ -237,7 +247,7 @@ idv005 = matrix(c(comparisons005$IDV$Method1$true_discoveries, comparisons005$ID
                   comparisons005$IDV$Method2$true_discoveries, comparisons005$IDV$Method2$false_discoveries,
                   comparisons005$IDV$GM$true_discoveries, comparisons005$IDV$GM$false_discoveries,
                   comparisons005$IDV$Knockoff$true_discoveries, comparisons005$IDV$Knockoff$false_discoveries,
-                  12, 0), nrow = 2, ncol = 5, byrow = FALSE, dimnames = list(rnames, cnames))
+                  comparisons005$IDV$BBH$true_discoveries, comparisons005$IDV$BBH$false_discoveries), nrow = 2, ncol = 5, byrow = FALSE, dimnames = list(rnames, cnames))
 
 pdf("./realdata_plot/idv005.pdf", width = 10, height = 8)
 barplot(idv005, main = "Resistance to IDV", 
@@ -249,7 +259,7 @@ lpv005 = matrix(c(comparisons005$LPV$Method1$true_discoveries, comparisons005$LP
                   comparisons005$LPV$Method2$true_discoveries, comparisons005$LPV$Method2$false_discoveries,
                   comparisons005$LPV$GM$true_discoveries, comparisons005$LPV$GM$false_discoveries,
                   comparisons005$LPV$Knockoff$true_discoveries, comparisons005$LPV$Knockoff$false_discoveries,
-                  5, 0), nrow = 2, ncol = 5, byrow = FALSE, dimnames = list(rnames, cnames))
+                  comparisons005$LPV$BBH$true_discoveries, comparisons005$LPV$BBH$false_discoveries), nrow = 2, ncol = 5, byrow = FALSE, dimnames = list(rnames, cnames))
 
 pdf("./realdata_plot/lpv005.pdf", width = 10, height = 8)
 barplot(lpv005, main = "Resistance to LPV", 
@@ -261,7 +271,7 @@ nfv005 = matrix(c(comparisons005$NFV$Method1$true_discoveries, comparisons005$NF
                   comparisons005$NFV$Method2$true_discoveries, comparisons005$NFV$Method2$false_discoveries,
                   comparisons005$NFV$GM$true_discoveries, comparisons005$NFV$GM$false_discoveries,
                   comparisons005$NFV$Knockoff$true_discoveries, comparisons005$NFV$Knockoff$false_discoveries,
-                  10, 1), nrow = 2, ncol = 5, byrow = FALSE, dimnames = list(rnames, cnames))
+                  comparisons005$NFV$BBH$true_discoveries, comparisons005$NFV$BBH$false_discoveries), nrow = 2, ncol = 5, byrow = FALSE, dimnames = list(rnames, cnames))
 
 pdf("./realdata_plot/nfv005.pdf", width = 10, height = 8)
 barplot(nfv005, main = "Resistance to NFV", 
@@ -273,7 +283,7 @@ rtv005 = matrix(c(comparisons005$RTV$Method1$true_discoveries, comparisons005$RT
                   comparisons005$RTV$Method2$true_discoveries, comparisons005$RTV$Method2$false_discoveries,
                   comparisons005$RTV$GM$true_discoveries, comparisons005$RTV$GM$false_discoveries,
                   comparisons005$RTV$Knockoff$true_discoveries, comparisons005$RTV$Knockoff$false_discoveries,
-                  7, 1), nrow = 2, ncol = 5, byrow = FALSE, dimnames = list(rnames, cnames))
+                  comparisons005$RTV$BBH$true_discoveries, comparisons005$RTV$BBH$false_discoveries), nrow = 2, ncol = 5, byrow = FALSE, dimnames = list(rnames, cnames))
 
 pdf("./realdata_plot/rtv005.pdf", width = 10, height = 8)
 barplot(rtv005, main = "Resistance to RTV", 
@@ -285,7 +295,7 @@ apv01 = matrix(c(comparisons01$APV$Method1$true_discoveries, comparisons01$APV$M
                  comparisons01$APV$Method2$true_discoveries, comparisons01$APV$Method2$false_discoveries,
                  comparisons01$APV$GM$true_discoveries, comparisons01$APV$GM$false_discoveries,
                  comparisons01$APV$Knockoff$true_discoveries, comparisons01$APV$Knockoff$false_discoveries,
-                 7, 1), nrow = 2, ncol = 5, byrow = FALSE, dimnames = list(rnames, cnames))
+                 comparisons01$APV$BBH$true_discoveries, comparisons01$APV$BBH$false_discoveries), nrow = 2, ncol = 5, byrow = FALSE, dimnames = list(rnames, cnames))
 
 pdf("./realdata_plot/apv01.pdf", width = 10, height = 8)
 barplot(apv01, main = "Resistance to APV", 
@@ -297,7 +307,7 @@ atv01 = matrix(c(comparisons01$ATV$Method1$true_discoveries, comparisons01$ATV$M
                  comparisons01$ATV$Method2$true_discoveries, comparisons01$ATV$Method2$false_discoveries,
                  comparisons01$ATV$GM$true_discoveries, comparisons01$ATV$GM$false_discoveries,
                  comparisons01$ATV$Knockoff$true_discoveries, comparisons01$ATV$Knockoff$false_discoveries,
-                 0, 0), nrow = 2, ncol = 5, byrow = FALSE, dimnames = list(rnames, cnames))
+                 comparisons01$ATV$BBH$true_discoveries, comparisons01$ATV$BBH$false_discoveries), nrow = 2, ncol = 5, byrow = FALSE, dimnames = list(rnames, cnames))
 
 pdf("./realdata_plot/atv01.pdf", width = 10, height = 8)
 barplot(atv01, main = "Resistance to ATV", 
@@ -309,7 +319,7 @@ idv01 = matrix(c(comparisons01$IDV$Method1$true_discoveries, comparisons01$IDV$M
                  comparisons01$IDV$Method2$true_discoveries, comparisons01$IDV$Method2$false_discoveries,
                  comparisons01$IDV$GM$true_discoveries, comparisons01$IDV$GM$false_discoveries,
                  comparisons01$IDV$Knockoff$true_discoveries, comparisons01$IDV$Knockoff$false_discoveries,
-                 14, 2), nrow = 2, ncol = 5, byrow = FALSE, dimnames = list(rnames, cnames))
+                 comparisons01$IDV$BBH$true_discoveries, comparisons01$IDV$BBH$false_discoveries), nrow = 2, ncol = 5, byrow = FALSE, dimnames = list(rnames, cnames))
 
 pdf("./realdata_plot/idv01.pdf", width = 10, height = 8)
 barplot(idv01, main = "Resistance to IDV", 
@@ -321,7 +331,7 @@ lpv01 = matrix(c(comparisons01$LPV$Method1$true_discoveries, comparisons01$LPV$M
                  comparisons01$LPV$Method2$true_discoveries, comparisons01$LPV$Method2$false_discoveries,
                  comparisons01$LPV$GM$true_discoveries, comparisons01$LPV$GM$false_discoveries,
                  comparisons01$LPV$Knockoff$true_discoveries, comparisons01$LPV$Knockoff$false_discoveries,
-                 5, 0), nrow = 2, ncol = 5, byrow = FALSE, dimnames = list(rnames, cnames))
+                 comparisons01$LPV$BBH$true_discoveries, comparisons01$LPV$BBH$false_discoveries), nrow = 2, ncol = 5, byrow = FALSE, dimnames = list(rnames, cnames))
 
 pdf("./realdata_plot/lpv01.pdf", width = 10, height = 8)
 barplot(lpv01, main = "Resistance to LPV", 
@@ -333,7 +343,7 @@ nfv01 = matrix(c(comparisons01$NFV$Method1$true_discoveries, comparisons01$NFV$M
                  comparisons01$NFV$Method2$true_discoveries, comparisons01$NFV$Method2$false_discoveries,
                  comparisons01$NFV$GM$true_discoveries, comparisons01$NFV$GM$false_discoveries,
                  comparisons01$NFV$Knockoff$true_discoveries, comparisons01$NFV$Knockoff$false_discoveries,
-                 12, 3), nrow = 2, ncol = 5, byrow = FALSE, dimnames = list(rnames, cnames))
+                 comparisons01$NFV$BBH$true_discoveries, comparisons01$NFV$BBH$false_discoveries), nrow = 2, ncol = 5, byrow = FALSE, dimnames = list(rnames, cnames))
 
 pdf("./realdata_plot/nfv01.pdf", width = 10, height = 8)
 barplot(nfv01, main = "Resistance to NFV", 
@@ -345,7 +355,7 @@ rtv01 = matrix(c(comparisons01$RTV$Method1$true_discoveries, comparisons01$RTV$M
                  comparisons01$RTV$Method2$true_discoveries, comparisons01$RTV$Method2$false_discoveries,
                  comparisons01$RTV$GM$true_discoveries, comparisons01$RTV$GM$false_discoveries,
                  comparisons01$RTV$Knockoff$true_discoveries, comparisons01$RTV$Knockoff$false_discoveries,
-                 9, 1), nrow = 2, ncol = 5, byrow = FALSE, dimnames = list(rnames, cnames))
+                 comparisons01$RTV$BBH$true_discoveries, comparisons01$RTV$BBH$false_discoveries), nrow = 2, ncol = 5, byrow = FALSE, dimnames = list(rnames, cnames))
 
 pdf("./realdata_plot/rtv01.pdf", width = 10, height = 8)
 barplot(rtv01, main = "Resistance to RTV", 
@@ -357,7 +367,7 @@ apv02 = matrix(c(comparisons02$APV$Method1$true_discoveries, comparisons02$APV$M
                  comparisons02$APV$Method2$true_discoveries, comparisons02$APV$Method2$false_discoveries,
                  comparisons02$APV$GM$true_discoveries, comparisons02$APV$GM$false_discoveries,
                  comparisons02$APV$Knockoff$true_discoveries, comparisons02$APV$Knockoff$false_discoveries,
-                 9, 2), nrow = 2, ncol = 5, byrow = FALSE, dimnames = list(rnames, cnames))
+                 comparisons02$APV$BBH$true_discoveries, comparisons02$APV$BBH$false_discoveries), nrow = 2, ncol = 5, byrow = FALSE, dimnames = list(rnames, cnames))
 
 pdf("./realdata_plot/apv02.pdf", width = 10, height = 8)
 barplot(apv02, main = "Resistance to APV", 
@@ -369,7 +379,7 @@ atv02 = matrix(c(comparisons02$ATV$Method1$true_discoveries, comparisons02$ATV$M
                  comparisons02$ATV$Method2$true_discoveries, comparisons02$ATV$Method2$false_discoveries,
                  comparisons02$ATV$GM$true_discoveries, comparisons02$ATV$GM$false_discoveries,
                  comparisons02$ATV$Knockoff$true_discoveries, comparisons02$ATV$Knockoff$false_discoveries,
-                 0, 0), nrow = 2, ncol = 5, byrow = FALSE, dimnames = list(rnames, cnames))
+                 comparisons02$ATV$BBH$true_discoveries, comparisons02$ATV$BBH$false_discoveries), nrow = 2, ncol = 5, byrow = FALSE, dimnames = list(rnames, cnames))
 
 pdf("./realdata_plot/atv02.pdf", width = 10, height = 8)
 barplot(atv02, main = "Resistance to ATV", 
@@ -381,7 +391,7 @@ idv02 = matrix(c(comparisons02$IDV$Method1$true_discoveries, comparisons02$IDV$M
                  comparisons02$IDV$Method2$true_discoveries, comparisons02$IDV$Method2$false_discoveries,
                  comparisons02$IDV$GM$true_discoveries, comparisons02$IDV$GM$false_discoveries,
                  comparisons02$IDV$Knockoff$true_discoveries, comparisons02$IDV$Knockoff$false_discoveries,
-                 15, 4), nrow = 2, ncol = 5, byrow = FALSE, dimnames = list(rnames, cnames))
+                 comparisons02$IDV$BBH$true_discoveries, comparisons02$IDV$BBH$false_discoveries), nrow = 2, ncol = 5, byrow = FALSE, dimnames = list(rnames, cnames))
 
 pdf("./realdata_plot/idv02.pdf", width = 10, height = 8)
 barplot(idv02, main = "Resistance to IDV", 
@@ -393,7 +403,7 @@ lpv02 = matrix(c(comparisons02$LPV$Method1$true_discoveries, comparisons02$LPV$M
                  comparisons02$LPV$Method2$true_discoveries, comparisons02$LPV$Method2$false_discoveries,
                  comparisons02$LPV$GM$true_discoveries, comparisons02$LPV$GM$false_discoveries,
                  comparisons02$LPV$Knockoff$true_discoveries, comparisons02$LPV$Knockoff$false_discoveries,
-                 5, 0), nrow = 2, ncol = 5, byrow = FALSE, dimnames = list(rnames, cnames))
+                 comparisons02$LPV$BBH$true_discoveries, comparisons02$LPV$BBH$false_discoveries), nrow = 2, ncol = 5, byrow = FALSE, dimnames = list(rnames, cnames))
 
 pdf("./realdata_plot/lpv02.pdf", width = 10, height = 8)
 barplot(lpv02, main = "Resistance to LPV", 
@@ -405,7 +415,7 @@ nfv02 = matrix(c(comparisons02$NFV$Method1$true_discoveries, comparisons02$NFV$M
                  comparisons02$NFV$Method2$true_discoveries, comparisons02$NFV$Method2$false_discoveries,
                  comparisons02$NFV$GM$true_discoveries, comparisons02$NFV$GM$false_discoveries,
                  comparisons02$NFV$Knockoff$true_discoveries, comparisons02$NFV$Knockoff$false_discoveries,
-                 12, 6), nrow = 2, ncol = 5, byrow = FALSE, dimnames = list(rnames, cnames))
+                 comparisons02$NFV$BBH$true_discoveries, comparisons02$NFV$BBH$false_discoveries), nrow = 2, ncol = 5, byrow = FALSE, dimnames = list(rnames, cnames))
 
 pdf("./realdata_plot/nfv02.pdf", width = 10, height = 8)
 barplot(nfv02, main = "Resistance to NFV", 
@@ -417,7 +427,7 @@ rtv02 = matrix(c(comparisons02$RTV$Method1$true_discoveries, comparisons02$RTV$M
                  comparisons02$RTV$Method2$true_discoveries, comparisons02$RTV$Method2$false_discoveries,
                  comparisons02$RTV$GM$true_discoveries, comparisons02$RTV$GM$false_discoveries,
                  comparisons02$RTV$Knockoff$true_discoveries, comparisons02$RTV$Knockoff$false_discoveries,
-                 11, 2), nrow = 2, ncol = 5, byrow = FALSE, dimnames = list(rnames, cnames))
+                 comparisons02$RTV$BBH$true_discoveries, comparisons02$RTV$BBH$false_discoveries), nrow = 2, ncol = 5, byrow = FALSE, dimnames = list(rnames, cnames))
 
 pdf("./realdata_plot/rtv02.pdf", width = 10, height = 8)
 barplot(rtv02, main = "Resistance to RTV", 

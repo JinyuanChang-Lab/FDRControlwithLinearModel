@@ -1,12 +1,17 @@
+---
+output:
+  html_document: default
+  pdf_document: default
+---
 ## Official Implementations of `Controlling the False Discovery Rate in High-Dimensional Linear Models Using Model-X Knockoffs and p-values`
 
 ## Introduction
 
-- We propose a novel multiple testing methodology for controlling the false discovery rate (FDR) in high-dimensional linear models that integrates model-X knockoff techniques with debiased penalized regression estimators. At the foundation of our methodology, we construct and study two sets of naturally paired high-dimensional test statistics and the associated p-values for evaluating the same null hypotheses. The first set is shown to be asymptotically mutually independent, justifying the use of the Benjamini-Hochberg procedure. We further exploit the pairing structure through a two-stage procedure aimed at improving power. Our theoretical results establish the key properties of the framework with respect to asymptotic FDR control and formally characterize the associated power gains of the two-stage procedure. Importantly, our framework accommodates general dependence in the design matrix. Extensive simulations demonstrate that our methods outperform existing approaches -- particularly those relying on empirical FDP estimates -- in both power and FDR control accuracy, with notable gains in settings involving weaker signals, small sample sizes, or low target FDR levels.
+- We propose a novel multiple testing methodology for controlling the false discovery rate (FDR) in high-dimensional linear models that integrates model-X knockoff techniques with debiased penalized regression estimators. At the foundation of our methodology, we construct and study two sets of naturally paired high-dimensional test statistics and the associated $p$-values for evaluating the same null hypotheses. The first set is shown to be asymptotically mutually independent, justifying the use of the Benjamini-Hochberg procedure. We further exploit the pairing structure through a two-step procedure aimed at improving power. Our theoretical results establish the key properties of the framework with respect to asymptotic FDR control and formally characterize the associated power gains of the two-step procedure. Importantly, our framework accommodates general dependence in the design matrix. Extensive simulations demonstrate that our methods outperform existing approaches -- particularly those relying on empirical FDP estimates -- in both power and FDR control accuracy, with notable gains in settings involving weaker signals, small sample sizes, or low target FDR levels.
 
 ## Data and Files
 
--   simulation: includes codes and figures for the simulation study in the paper. It includes 5 sections, which are "Zero amplitude" (section 1, S1), "Amplitude" (section 2, S2), "Highly correlated covariates" (section 3, S3), "Two-stage refined methods" (section 4, S4), and "Low dimension" (section 5, S5).
+-   simulation: includes codes and figures for the simulation study in the paper. It includes 6 sections, which are "Zero amplitude" (section 1, S1), "Amplitude" (section 2, S2), "Highly correlated covariates" (section 3, S3), "Two-stage refined methods" (section 4, S4), "Low dimension" (section 5, S5) and "Selective inference".
 
 -   realdata: includes codes, data and figures for the real data analysis in the paper.
 
@@ -27,8 +32,10 @@
 |Two-stage refined methods | `S4_simulation.R` and `S4_plot.R` | `S4_simulation.RData` and 18 subfigures in folder `S4_plot` | Figures 3, F11 and F12. |
 |Two-stage refined methods | `S4_simulation_nongaussian.R` and `S4_plot_nongaussian.R` | `S4_simulation_nongaussian.RData` and 6 subfigures in folder `S4_plot_nongaussian` | Figure F26. |
 |Low dimension | `S5_simulation.R` and `S5_plot.R` | `S5_simulation.RData` and 18 subfigures in folder `S5_plot` | Figures 4, F13 and F14. |
-
+|Selective inference |`S1_simulation_knockoff_recycle.R`, `S1_simulation_knockoff_split.R`, `S1_simulation_OLS_BH.R`, `S1_simulation_SI.R`, `S1_simulation_PSI_BH.R`, `S1_simulation_Tian_BH.R` and `SI_plot_S1.R` | 12 `.RData` files (`S1_simulation_knockoff_recycle.RData`, `S1_simulation_knockoff_split.RData`, `S1_simulation_OLS_BH.RData`, `S1_simulation.RData`, `S1_simulation_PSI_BH.RData`, `S1_simulation_Tian_BH.RData`, plus their `_005.RData` variants) and 12 subfigures in folder `SI_plot_S1` | Figures F31 and F32 |
+|Selective inference |`S2_simulation_knockoff_recycle.R`, `S2_simulation_knockoff_split.R`, `S2_simulation_OLS_BH.R`, `S2_simulation_SI.R`, `S2_simulation_PSI_BH.R`, `S2_simulation_Tian_BH.R` and `SI_plot_S2.R` | 14 `.RData` files (`S2_simulation_knockoff_recycle.RData`, `S2_simulation_knockoff_split.RData`, `S2_simulation_OLS_BH.RData`, `S2_simulation_PSI_BH.RData`, `S2_simulation_Tian_BH.RData`, `S2_simulation.RData`, `S2_simulation_indep.RData`, plus their `_005.RData` variants) and 48 subfigures in folder `SI_plot_S2` | Figures F33-F36 |
 - All figures with names starting with "F" are in the Supplementary Material of the paper.
+- Note for Selective inference: The simulation scripts for this section are located in their respective method subfolders (e.g., knockoff_recycle, knockoff_split, OLS_BH, Our_methods, PSI_BH, and tian_BH), while the plotting scripts (SI_plot_S1.R and SI_plot_S2.R) and their corresponding output folders are kept in the main directory.
 
 ## Real data scripts and outputs
 
@@ -50,13 +57,15 @@
 
 -   Since the simulations in Section G.6 and I in the Supplementary Material require data from previous sections, please ensure that the simulation codes are run in order to generate the RData files and then produce the plots. Otherwise, data may be missing when generating the plots.
 
+-   In all our large-scale experiments, due to occasional causes, the FDR and power returned for a very small number of sample points are both missing. We uniformly treat such missing values as 0 in plotting to ensure that figures can be generated normally.
+
 -   For more detailed information, please refer to the readme files in each folder.
 
 ## Note:
 
 * All source files for simulation study are in the folder "simulation/source".
 
-* HD_LM_BBH.R is a general solver of Algorithm 1 and 2. The corresponding demo file is Demo.R. 
+* **HD_LM_BBH.R is a general solver of Algorithm 1 and 2. The corresponding demo file is Demo.R.** 
 
 * Inverse.R is the code of estimating the precision matrix.
 
@@ -80,3 +89,12 @@
 
 * BBH.R is the code of the BBH method.
 
+* knockoff_recycle_sqrtlasso.R is the code for the knockoff recycle method using the square-root Lasso.
+
+* knockoff_split_sqrtlasso.R is the code for the knockoff split method using the square-root Lasso.
+
+* OLS_BH.R is the code for the OLS method combined with the BH procedure.
+
+* PSI_BH.R is the code for the post-selection inference method combined with the BH procedure.
+
+* sqrtLasso_Tian_BH.R is the code for Tian's method based on square-root Lasso combined with the BH procedure, this method also relies on the auxiliary files funs.common.R, funs.inf.R, and funs.fixed.R.
