@@ -1,3 +1,4 @@
+# Make sure the working directory is the source folder
 source("./HD_LM_BBH.R")
 
 # Parameters

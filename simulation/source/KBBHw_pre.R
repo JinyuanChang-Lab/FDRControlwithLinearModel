@@ -49,15 +49,8 @@ KBBHw_pre = function(n,p,k,amplitude,alpha,rho){
   
   # Augmented linear model and debiased Lasso
   AX = cbind(sX, sKX)
-  
-  AX0 = cbind(X, KX)
-  fit = cv.glmnet(AX0, y, nlambda=100, alpha=1, standardize=T)
-  Ab0 = as.vector(coef(fit, s=fit$lambda.1se))[-1]
-  
-  kidx = idx + p
-  aidx = c(idx, kidx)
-  
-  Ab = Ab0[aidx]
+  fit = cv.glmnet(AX, y, nlambda=100, alpha=1, standardize=T)
+  Ab = as.vector(coef(fit, s=fit$lambda.1se))[-1]
   
   G = t(AX)%*%AX/n
   Inv = InverseLinfty(G, n)

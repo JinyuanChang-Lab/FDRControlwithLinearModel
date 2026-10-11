@@ -36,6 +36,7 @@ DSBBH = function(n,p,k,amplitude,alpha,rho){
   # Generate knockoff
   Sigma2 = t(X2)%*%X2/n2
   Omega = InverseLinfty(Sigma2, n2)
+  Omega = ifelse(abs(Omega) < abs(t(Omega)) | (abs(Omega) == abs(t(Omega)) & row(Omega) <= col(Omega)), Omega, t(Omega))
   lambdamax = max(Re(eigen(Omega)$values))
   D = 1.7/lambdamax*diag(p)
   xi = matrix(rnorm(n1 * p), nrow = n1, ncol = p)
