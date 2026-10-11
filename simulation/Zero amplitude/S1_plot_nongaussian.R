@@ -31,6 +31,7 @@ get_fdr_matrix <- function(structure, n, p_seq) {
     
     mat[i, ] <- c(colMeans(r_val)[c(1, 3, 5)], colMeans(rgm_val)[1])
   }
+  
   return(mat)
 }
 

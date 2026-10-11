@@ -3,7 +3,7 @@ library(ggplot2)
 env_origin <- new.env()
 env_sim <- new.env()
 load("./S1_plot_origin/S1_simulation_origin.RData", envir = env_origin)
-load("./S1_plot/S1_simulation.RData", envir = env_sim)
+load("./S1_plot/S1_simulation.RData", envir = env_sim) 
 
 replace_na_with_0 <- function(env) {
   for (var_name in ls(envir = env)) {
@@ -37,6 +37,7 @@ get_fdr_matrix <- function(fdr_level, structure, n, p_seq) {
     
     mat[i, ] <- c(colMeans(val_sim)[c(1, 3)], colMeans(val_origin)[c(1, 3)])
   }
+  
   return(mat)
 }
 

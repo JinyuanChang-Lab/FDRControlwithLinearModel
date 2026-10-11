@@ -27,8 +27,10 @@ get_fdr_matrix <- function(structure, n, p_seq) {
                      block = paste0("r_En", n, "_p", p))
     val_sim <- get(prefix, envir = env_sim)
     val_ds <- get(prefix, envir = env_ds)
+    
     mat[i, ] <- c(colMeans(val_sim)[c(1, 3)], colMeans(val_ds)[c(1, 3)])
   }
+  
   return(mat)
 }
 

@@ -33,7 +33,7 @@ ds_cov <- list(
 )
 
 for (n_base in n_values) {
-  n_ds <- 2 * n_base  
+  n_ds <- n_base
   p_values <- p_list[[as.character(n_base)]]
   
   for (p in p_values) {

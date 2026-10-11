@@ -51,6 +51,7 @@ get_matrices <- function(n, p, fdr_level) {
   
   fdr_mat[is.na(fdr_mat)] <- 0
   power_mat[is.na(power_mat)] <- 0
+  
   return(list(fdr = fdr_mat, power = power_mat))
 }
 
@@ -63,7 +64,6 @@ x_vals <- rep(amp_seq, times = 6)
 plot_result <- function(fdr_mat, power_mat, n, p, fdr_str, save_path = "./S4_plot") {
   if (!dir.exists(save_path)) dir.create(save_path, recursive = TRUE)
   
-  # FDR Plot
   fdr_vals <- c(fdr_mat[, 1], fdr_mat[, 2], fdr_mat[, 3], fdr_mat[, 4], fdr_mat[, 5], fdr_mat[, 6])
   df_fdr <- data.frame(x = x_vals, type = type, y = fdr_vals)
   
@@ -83,7 +83,6 @@ plot_result <- function(fdr_mat, power_mat, n, p, fdr_str, save_path = "./S4_plo
   
   ggsave(sprintf("n%dp%dfdr_%s.pdf", n, p, fdr_str), p_fdr, device = "pdf", path = save_path, width = 8, height = 6)
   
-  # Power Plot
   power_vals <- c(power_mat[, 1], power_mat[, 2], power_mat[, 3], power_mat[, 4], power_mat[, 5], power_mat[, 6])
   df_power <- data.frame(x = x_vals, type = type, y = power_vals)
   
