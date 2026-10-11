@@ -14,7 +14,7 @@ for (f in source_files) source(f)
 RNGkind(kind = "Mersenne-Twister", normal.kind = "Inversion", sample.kind = "Rejection")
 set.seed(2024)
 
-cl <- makeCluster(32, type = "SOCK")
+cl <- makeCluster(10, type = "SOCK")
 registerDoParallel(cl)
 
 rho <- 0.4
@@ -30,7 +30,7 @@ fdr_configs <- list(
   list(fdr = 0.2,  suffix = "_A02")
 )
 
-run_simulation <- function(n, p, k, amp, fdr, suffix, func_str, var_prefix) {
+run_simulation <- function(n, p, k, amp, fdr, suffix, func_str, var_prefix, rho_val) {
   amp_str <- gsub("\\.", "", sprintf("%.2f", amp))
   var_name <- paste0(var_prefix, "n", n, "_p", p, "_k", k, "_amp", amp_str, suffix)
   
@@ -41,6 +41,7 @@ run_simulation <- function(n, p, k, amp, fdr, suffix, func_str, var_prefix) {
   loc_fdr <- fdr
   loc_func_str <- func_str
   loc_src <- source_files
+  loc_rho <- rho_val
   
   assign(var_name, foreach(i = 1:100, .combine = rbind,
                            .packages = c('knockoff', 'scalreg', 'glmnet', 'doParallel', 'foreach'),
@@ -48,7 +49,7 @@ run_simulation <- function(n, p, k, amp, fdr, suffix, func_str, var_prefix) {
                            .export = c("source_files")) %dorng% {
                              for (f in loc_src) source(f)
                              f <- get(loc_func_str)
-                             f(loc_n, loc_p, loc_k, loc_amp, loc_fdr, rho)
+                             f(loc_n, loc_p, loc_k, loc_amp, loc_fdr, loc_rho)
                            }, envir = .GlobalEnv)
 }
 
@@ -58,7 +59,7 @@ for (npk in npk_list) {
   k <- npk[3]
   for (amp in amp_values) {
     for (fdr_cfg in fdr_configs) {
-      run_simulation(n, p, k, amp, fdr_cfg$fdr, fdr_cfg$suffix, "K_BH_BBH", "r_")
+      run_simulation(n, p, k, amp, fdr_cfg$fdr, fdr_cfg$suffix, "K_BH_BBH", "r_", rho)
     }
   }
 }
@@ -69,7 +70,7 @@ for (npk in npk_list) {
   k <- npk[3]
   for (amp in amp_values) {
     for (fdr_cfg in fdr_configs) {
-      run_simulation(n, p, k, amp, fdr_cfg$fdr, fdr_cfg$suffix, "BBH", "r_bh_")
+      run_simulation(n, p, k, amp, fdr_cfg$fdr, fdr_cfg$suffix, "BBH", "r_bh_", rho)
     }
   }
 }
